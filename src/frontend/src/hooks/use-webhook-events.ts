@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useMemo, useRef } from "react";
+import { BASE_URL_API } from "@/customization/config-constants";
 import { BuildStatus } from "@/constants/enums";
 import useAuthStore from "@/stores/authStore";
 import useFlowStore from "@/stores/flowStore";
@@ -144,7 +145,9 @@ export function useWebhookEvents() {
     }
 
     const flowIdentifier = currentFlow.endpoint_name || currentFlow.id;
-    let sseUrl = `/api/v1/webhook-events/${flowIdentifier}`;
+    // Fenrix: BASE_URL_API (not a literal "/api/v1/") so this SSE connection carries
+    // the tenant subpath prefix the same way every other API call already does.
+    let sseUrl = `${BASE_URL_API}webhook-events/${flowIdentifier}`;
 
     if (apiKey) {
       sseUrl += `?x-api-key=${encodeURIComponent(apiKey)}`;

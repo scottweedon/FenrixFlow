@@ -1146,6 +1146,53 @@ def add_sentry_middleware(app: FastAPI) -> None:
         app.add_middleware(SentryAsgiMiddleware)
 
 
+def _fenrix_inject_basename(static_files_dir: Path) -> None:
+    """Fenrix: bakes the per-tenant URL prefix into the built index.html on disk.
+
+    Langflow's frontend has no runtime config for being served from a subpath - BASENAME
+    (frontend/src/customization/config-constants.ts) is a hardcoded build-time constant,
+    confirmed via upstream discussion/issue threads on subpath reverse-proxy deployment
+    (a maintainer's answer to "white screen behind /langflow" was to hardcode BASENAME per
+    deployment). The provisioner deploys one shared image per tenant rather than doing a
+    per-tenant frontend rebuild, so this reads LANGFLOW_BASENAME once at server startup and
+    writes it into index.html as a global the frontend's config-constants.ts reads instead
+    of its build-time default.
+
+    Rewriting the file on disk (rather than intercepting specific routes) means every code
+    path that serves index.html - the explicit "/" route below, app.frontend()'s own
+    internal SPA fallback for client-side routes, and the custom_404_handler fallback -
+    picks up the injected value automatically, without needing to know about or duplicate
+    app.frontend()'s internal fallback-matching logic.
+
+    Also rewrites the hardcoded ``<base href="/" />`` tag already present in the built
+    HTML. That tag governs how the browser resolves every ``./``-relative URL on the page
+    (asset script/link tags, favicon, manifest) - with it pinned to "/", those requests go
+    to the domain root instead of this tenant's prefix regardless of the BASENAME fix
+    above, which only affects React Router. This is almost certainly the real root cause
+    of the "white screen" behind a subpath reported upstream: assets 404 before React
+    Router (or the BASENAME global) ever gets a chance to run.
+    """
+    index_path = static_files_dir / "index.html"
+
+    if not index_path.exists():
+        return
+
+    html = index_path.read_text(encoding="utf-8")
+    marker = "window.__LANGFLOW_BASENAME__"
+
+    if marker in html:
+        return
+
+    basename = os.environ.get("LANGFLOW_BASENAME", "").rstrip("/")
+    injected = f'<script>{marker}="{basename}";</script>'
+    html = html.replace("<head>", f"<head>{injected}", 1) if "<head>" in html else injected + html
+
+    if basename:
+        html = html.replace('<base href="/" />', f'<base href="{basename}/" />', 1)
+
+    index_path.write_text(html, encoding="utf-8")
+
+
 def setup_static_files(app: FastAPI, static_files_dir: Path) -> None:
     """Setup the static files directory.
 
@@ -1153,6 +1200,7 @@ def setup_static_files(app: FastAPI, static_files_dir: Path) -> None:
         app (FastAPI): FastAPI app.
         static_files_dir (str): Path to the static files directory.
     """
+    _fenrix_inject_basename(static_files_dir)
 
     # app.frontend() serves index.html for any unmatched GET, so an unknown
     # /api/* GET would otherwise return the SPA shell instead of a JSON 404.
