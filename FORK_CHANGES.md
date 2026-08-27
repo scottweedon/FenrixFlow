@@ -98,3 +98,44 @@ be configurable per-container, not hardcoded at build time.
   not a placeholder), and confirmed directly (`ChatOllamaComponent().inputs` inspected
   inside the running container) that both fields default to the configured values, not the
   upstream `http://localhost:11434` / empty-selection defaults.
+
+### OLLAMA_BASE_URL auto-imported as a global variable
+
+- **File:** `src/lfx/src/lfx/services/settings/constants.py`
+  (`VARIABLES_TO_GET_FROM_ENVIRONMENT`).
+- **Why not a seam:** the new `src/bundles/fenrix/` provider bundle (a plain
+  extension, no core edit) registers a "Fenrix" entry in Langflow's Model
+  Providers dialog backed by the `OLLAMA_BASE_URL` global variable. That
+  dialog's "configured" state is driven entirely by whether the variable
+  already exists for the user - and `initialize_user_variables` only
+  auto-creates variables named in this fixed list at login, confirmed via a
+  real source read that `OLLAMA_BASE_URL` was not already in it (every other
+  built-in provider's key already is). Without this addition, every tenant
+  user would have to manually click into the Fenrix card and type in the
+  platform's own internal Ollama proxy URL themselves.
+- **Interface:** one additional string in the list. FenrixCloud's provisioner
+  sets a plain (unprefixed) `OLLAMA_BASE_URL` env var on the `langflow-app`
+  container (`infra/templates/tenant-stack/docker-compose.template.yml`,
+  alongside the existing `LANGFLOW_OLLAMA_BASE_URL` this file's component
+  patch above reads), so the auto-import now seeds the same value as a global
+  variable at every login - no separate mechanism, no manual entry.
+- **Expected upstream conflicts:** none beyond a routine merge conflict if
+  upstream reorders/extends this same list.
+- **Verified:** built a real image (`docker/build_and_push.Dockerfile`, target
+  `full`), ran it standalone with `OLLAMA_BASE_URL` set, logged in via the
+  real API, and confirmed directly against the running container:
+  `GET /api/v1/variables` lists `OLLAMA_BASE_URL` with `has_value: true`
+  (auto-imported, not manually created), and `GET /api/v1/models` - the same
+  endpoint the frontend's Model Providers dialog reads - returns a `"Fenrix"`
+  entry with `"is_configured": true` and `"live_discovery": true`, alongside
+  every other provider (all `is_configured: false`, as expected with no keys
+  set). Also unit-verified the registration path directly: loaded
+  `src/bundles/fenrix/src/lfx_fenrix/extension.json` through
+  `lfx.extension.manifest.load_manifest`, called `register_provider` on the
+  resulting spec, and confirmed it merges into `MODEL_PROVIDER_METADATA` and
+  `LIVE_MODEL_PROVIDERS` without conflict (reusing the already-registered
+  `ChatOllama` class import - `model_class` is deliberately omitted from the
+  spec, so no new import is added), that `live_discovery_for("Fenrix")` and
+  `validator_for("Fenrix")` resolve the dotted-path callables, and that
+  calling the live-discovery callable with no reachable server degrades to an
+  empty list rather than raising.

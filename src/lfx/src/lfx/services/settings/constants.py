@@ -53,6 +53,10 @@ VARIABLES_TO_GET_FROM_ENVIRONMENT = [
     "OPENROUTER_API_KEY",
     "OPENROUTER_SITE_URL",
     "OPENROUTER_APP_NAME",
+    # Fenrix fork addition (FORK_CHANGES.md) - lets the platform's shared Ollama server
+    # URL auto-populate as a global variable at login, the same way every other listed
+    # provider key does, instead of requiring a manual "Model providers" entry per user.
+    "OLLAMA_BASE_URL",
 ]
 
 # Agentic experience specific variables
