@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 from contextlib import suppress
 from typing import Any
 from urllib.parse import urljoin
@@ -99,7 +100,14 @@ class ChatOllamaComponent(LCModelComponent):
             name="base_url",
             display_name="Ollama API URL",
             info="Endpoint of the Ollama API. Defaults to http://localhost:11434.",
-            value="http://localhost:11434",
+            # Fenrix: upstream hardcodes this default with no way to point every new node
+            # at this platform's actual shared Ollama server (confirmed via a real source
+            # read - no env var or settings hook exists anywhere in this component or
+            # services/settings for it, unlike OpenAI/Anthropic's credentials.py). Reads
+            # LANGFLOW_OLLAMA_BASE_URL once at component-definition time so every new
+            # Ollama node in every flow defaults to the tenant's real server instead of
+            # localhost; a user can still override it per-node same as before.
+            value=os.environ.get("LANGFLOW_OLLAMA_BASE_URL", "http://localhost:11434"),
             real_time_refresh=True,
         ),
         DropdownInput(
