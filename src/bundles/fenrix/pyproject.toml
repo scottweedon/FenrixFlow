@@ -1,7 +1,7 @@
 [project]
 name = "lfx-fenrix"
-version = "0.1.0"
-description = "Fenrix - FenrixCloud's shared Ollama model server, pre-configured as a first-class Langflow model provider."
+version = "0.2.0"
+description = "Fenrix - FenrixCloud platform glue: a pre-configured Ollama model provider plus components for the rest of the platform (e.g. LibreChat memories)."
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
 license = { text = "MIT" }
@@ -39,7 +39,11 @@ build-backend = "hatchling.build"
 # ``importlib.metadata.files(dist)`` finds the manifest and the registry can
 # import the live-discovery / validator callables by dotted path.
 packages = ["src/lfx_fenrix"]
-include = ["src/lfx_fenrix/extension.json", "src/lfx_fenrix/*.py"]
+include = [
+    "src/lfx_fenrix/extension.json",
+    "src/lfx_fenrix/*.py",
+    "src/lfx_fenrix/components/**/*.py",
+]
 
 [tool.hatch.build.targets.sdist]
 include = [

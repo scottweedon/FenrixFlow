@@ -1,10 +1,16 @@
 {
   "$schema": "https://schemas.langflow.org/extension/v1.json",
   "id": "lfx-fenrix",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Fenrix",
-  "description": "FenrixCloud's shared self-hosted Ollama model server, pre-configured for every tenant.",
+  "description": "FenrixCloud platform glue: a pre-configured Ollama model provider and components for the rest of the platform (e.g. LibreChat memories).",
   "lfx": { "compat": ["1"] },
+  "bundles": [
+    {
+      "name": "fenrix",
+      "path": "components/fenrix"
+    }
+  ],
   "providers": [
     {
       "name": "Fenrix",

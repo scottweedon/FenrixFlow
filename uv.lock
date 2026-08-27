@@ -10223,7 +10223,7 @@ requires-dist = [
 
 [[package]]
 name = "lfx-fenrix"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "src/bundles/fenrix" }
 dependencies = [
     { name = "httpx" },
