@@ -68,10 +68,10 @@ be configurable per-container, not hardcoded at build time.
   (`/api/v1/auto_login`) resolves (200 JSON), confirming `BASE_URL_API`'s derivation from
   `BASENAME` reaches Caddy correctly.
 
-### Ollama base URL default from environment
+### Ollama base URL and default model from environment
 
 - **File:** `src/bundles/ollama/src/lfx_ollama/components/ollama/ollama.py`
-  (`ChatOllamaComponent`'s `base_url` `StrInput`).
+  (`ChatOllamaComponent`'s `base_url` `StrInput` and `model_name` `DropdownInput`).
 - **Why not a seam:** every new Ollama node in every flow defaults to
   `http://localhost:11434` with no way to point it at this platform's actual shared
   Ollama server - confirmed via a real source read that, unlike OpenAI/Anthropic
@@ -85,10 +85,16 @@ be configurable per-container, not hardcoded at build time.
   instead of the hardcoded literal - a single-line default-value change, not new
   behavior. Reads once at component-definition time (matching how the field's static
   default already worked); a user can still override it per-node exactly as before.
-- **Expected upstream conflicts:** any upstream change to this input's declaration or to
+  `model_name` gets the same treatment - `value=os.environ.get("LANGFLOW_OLLAMA_DEFAULT_MODEL", "")`
+  - since its `options` list is only ever populated live from `update_build_config`
+  (never pre-filled), a brand new node otherwise starts with no model selected at all even
+  when the server default is already correct, forcing a manual pick before the node is
+  usable.
+- **Expected upstream conflicts:** any upstream change to these inputs' declarations or to
   `ChatOllamaComponent`'s constructor signature.
 - **Verified:** built a real image (`docker/build_and_push.Dockerfile`), ran it as a tenant
-  container with `LANGFLOW_OLLAMA_BASE_URL` set to a real value, and confirmed directly
-  (`ChatOllamaComponent().inputs` inspected inside the running container) that the
-  `base_url` field's default is the configured value, not the upstream
-  `http://localhost:11434` literal.
+  container with `LANGFLOW_OLLAMA_BASE_URL` and `LANGFLOW_OLLAMA_DEFAULT_MODEL` set to real
+  values (the latter against the real hosted Ollama server via the platform's SSH tunnel,
+  not a placeholder), and confirmed directly (`ChatOllamaComponent().inputs` inspected
+  inside the running container) that both fields default to the configured values, not the
+  upstream `http://localhost:11434` / empty-selection defaults.

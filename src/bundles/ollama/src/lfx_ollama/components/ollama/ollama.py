@@ -114,6 +114,14 @@ class ChatOllamaComponent(LCModelComponent):
             name="model_name",
             display_name="Model Name",
             options=[],
+            # Fenrix: seeds the initial selection with this platform's default model, same
+            # rationale/mechanism as base_url above - a brand new node otherwise starts with
+            # no model selected at all (options is only ever populated live from base_url,
+            # never pre-filled), forcing a manual pick before the node is usable even once
+            # the server default is already correct. update_build_config still repopulates
+            # `options` from the live server on every base_url/model_name refresh; this only
+            # seeds which one starts selected.
+            value=os.environ.get("LANGFLOW_OLLAMA_DEFAULT_MODEL", ""),
             info="Refer to https://ollama.com/library for more models.",
             refresh_button=True,
             real_time_refresh=True,
