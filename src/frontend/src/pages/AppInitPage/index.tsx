@@ -14,15 +14,10 @@ import { useGetVersionQuery } from "@/controllers/API/queries/version";
 import { CustomLoadingPage } from "@/customization/components/custom-loading-page";
 import { useCustomPrimaryLoading } from "@/customization/hooks/use-custom-primary-loading";
 import useAuthStore from "@/stores/authStore";
-import { useDarkStore } from "@/stores/darkStore";
 import useFlowsManagerStore from "@/stores/flowsManagerStore";
 import { LoadingPage } from "../LoadingPage";
 
 export function AppInitPage() {
-  const refreshStars = useDarkStore((state) => state.refreshStars);
-  const refreshDiscordCount = useDarkStore(
-    (state) => state.refreshDiscordCount,
-  );
   const isLoading = useFlowsManagerStore((state) => state.isLoading);
   const { setUserData, storeApiKey } = useContext(AuthContext);
   const setIsAuthenticated = useAuthStore((state) => state.setIsAuthenticated);
@@ -69,11 +64,6 @@ export function AppInitPage() {
   }, [sessionData]);
 
   useEffect(() => {
-    if (isFetched) {
-      refreshStars();
-      refreshDiscordCount();
-    }
-
     if (isConfigFetched) {
       refetchExamples();
     }

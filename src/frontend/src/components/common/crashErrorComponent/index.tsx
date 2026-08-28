@@ -2,7 +2,7 @@ import { XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { crashComponentPropsType } from "../../../types/components";
 import { Button } from "../../ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
+import { Card, CardFooter, CardHeader } from "../../ui/card";
 
 export default function CrashErrorComponent({
   error,
@@ -29,39 +29,10 @@ export default function CrashErrorComponent({
               </div>
             </CardHeader>
 
-            <CardContent className="grid">
-              <div>
-                <p>
-                  {t("crash.descriptionBefore")}{" "}
-                  <a
-                    href="https://github.com/langflow-ai/langflow/issues"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium hover:underline"
-                  >
-                    {t("crash.githubIssues")}
-                  </a>{" "}
-                  {t("crash.descriptionAfter")}
-                  <br></br>
-                  {t("crash.thankYou")}
-                </p>
-              </div>
-            </CardContent>
-
             <CardFooter>
               <div className="m-auto mt-4 flex justify-center">
                 <Button onClick={resetErrorBoundary}>
                   {t("crash.restartButton")}
-                </Button>
-
-                <Button className="ml-3" variant="outline" asChild>
-                  <a
-                    href="https://github.com/langflow-ai/langflow/issues/new"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t("crash.reportButton")}
-                  </a>
                 </Button>
               </div>
             </CardFooter>

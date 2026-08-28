@@ -18,7 +18,6 @@ export type HelpDropdownViewProps = {
   openLink: (url: string) => void;
   urls: {
     docs: string;
-    bugReport: string;
     desktop: string;
   };
 };
@@ -68,13 +67,6 @@ export const HelpDropdownView = ({
           testId="canvas_controls_dropdown_shortcuts"
           label={t("help.shortcuts")}
           onClick={() => navigateTo("/settings/shortcuts")}
-        />
-        <DropdownControlButton
-          iconName="bug"
-          testId="canvas_controls_dropdown_report_a_bug"
-          externalLink
-          label={t("help.reportBug")}
-          onClick={() => openLink(urls.bugReport)}
         />
         <Separator />
         <DropdownControlButton

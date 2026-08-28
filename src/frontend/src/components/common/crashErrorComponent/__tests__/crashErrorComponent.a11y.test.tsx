@@ -39,23 +39,6 @@ describe("CrashErrorComponent accessibility", () => {
     );
   });
 
-  // The report action used to be a <button> nested inside an <a href>, which
-  // is a nested-interactive violation and gives the anchor no reachable name
-  // of its own (WCAG 4.1.2).
-  it("should_render_the_report_action_as_a_single_link", () => {
-    renderCrashScreen();
-
-    const report = screen.getByRole("link", { name: /report on github/i });
-    expect(report).toHaveAttribute(
-      "href",
-      "https://github.com/langflow-ai/langflow/issues/new",
-    );
-    expect(report.querySelector("button")).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: /report on github/i }),
-    ).not.toBeInTheDocument();
-  });
-
   it("should_reset_the_error_boundary_from_the_restart_button", async () => {
     const user = userEvent.setup();
     const resetErrorBoundary = jest.fn();

@@ -64,7 +64,6 @@ describe("HelpDropdownView", () => {
     const openLink = jest.fn();
     const urls = {
       docs: "https://docs",
-      bugReport: "https://bugs",
       desktop: "https://desktop",
     };
 
@@ -85,11 +84,6 @@ describe("HelpDropdownView", () => {
 
     fireEvent.click(screen.getByTestId("canvas_controls_dropdown_shortcuts"));
     expect(navigateTo).toHaveBeenCalledWith("/settings/shortcuts");
-
-    fireEvent.click(
-      screen.getByTestId("canvas_controls_dropdown_report_a_bug"),
-    );
-    expect(openLink).toHaveBeenCalledWith("https://bugs");
 
     fireEvent.click(
       screen.getByTestId("canvas_controls_dropdown_get_langflow_desktop"),
